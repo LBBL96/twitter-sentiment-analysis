@@ -116,8 +116,26 @@ class SentimentModelTrainer:
         batch_size: int | None = None,
         warmup_steps: int = 500,
         weight_decay: float = 0.01,
-        early_stopping_patience: int = 3
+        early_stopping_patience: int = 3,
+        enable_mlflow_autolog: bool = True
     ) -> dict:
+        """
+        Train the sentiment analysis model.
+        
+        Args:
+            train_dataset: Training dataset
+            val_dataset: Validation dataset
+            learning_rate: Learning rate for training
+            num_epochs: Number of training epochs
+            batch_size: Batch size for training
+            warmup_steps: Number of warmup steps
+            weight_decay: Weight decay for optimizer
+            early_stopping_patience: Patience for early stopping
+            enable_mlflow_autolog: Enable MLflow autologging (recommended)
+            
+        Returns:
+            Dictionary of training metrics
+        """
         learning_rate = learning_rate or settings.learning_rate
         num_epochs = num_epochs or settings.num_epochs
         batch_size = batch_size or settings.batch_size
@@ -126,6 +144,10 @@ class SentimentModelTrainer:
             self.model_name,
             num_labels=self.num_labels
         )
+        
+        # Determine reporting strategy
+        # If MLflow autolog is enabled, report to mlflow for automatic tracking
+        report_to = ['mlflow'] if enable_mlflow_autolog else ['none']
         
         training_args = TrainingArguments(
             output_dir=self.output_dir,
@@ -143,7 +165,7 @@ class SentimentModelTrainer:
             metric_for_best_model='f1',
             greater_is_better=True,
             save_total_limit=3,
-            report_to=['none']
+            report_to=report_to  # Enable MLflow autologging
         )
         
         self.trainer = Trainer(

@@ -1,5 +1,5 @@
 import mlflow
-import mlflow.pytorch
+import mlflow.transformers
 from typing import Any
 import logging
 from config import settings
@@ -9,6 +9,15 @@ logger = logging.getLogger(__name__)
 
 
 class MLflowTracker:
+    """
+    MLflow Tracker for Transformer Models
+    
+    Uses MLflow's transformers flavor for better integration with HuggingFace models.
+    Provides automatic metadata logging, model cards, and standardized inference.
+    
+    Documentation: https://mlflow.org/docs/latest/ml/deep-learning/transformers/
+    """
+    
     def __init__(
         self,
         tracking_uri: str | None = None,
@@ -21,6 +30,7 @@ class MLflowTracker:
         mlflow.set_experiment(self.experiment_name)
         
         logger.info(f"MLflow tracking initialized: {self.tracking_uri}")
+        logger.info(f"Using transformers flavor for HuggingFace model logging")
     
     def start_run(self, run_name: str | None = None, tags: dict[str, str] | None = None):
         mlflow.start_run(run_name=run_name)
@@ -32,16 +42,43 @@ class MLflowTracker:
         return mlflow.active_run()
     
     def log_params(self, params: dict[str, Any]):
+        """Log parameters to MLflow."""
         for key, value in params.items():
             mlflow.log_param(key, value)
     
     def log_metrics(self, metrics: dict[str, float], step: int | None = None):
+        """Log metrics to MLflow."""
         for key, value in metrics.items():
             mlflow.log_metric(key, value, step=step)
     
     def log_model(self, model, artifact_path: str = "model", **kwargs):
-        mlflow.pytorch.log_model(model, artifact_path, **kwargs)
-        logger.info(f"Model logged to MLflow: {artifact_path}")
+        """
+        Log transformer model using MLflow's transformers flavor.
+        
+        This provides better integration with HuggingFace models including:
+        - Automatic metadata and model card logging
+        - PyFunc inference interface
+        - Better model versioning and tracking
+        
+        Args:
+            model: HuggingFace transformer model or pipeline
+            artifact_path: Path within the run to save the model
+            **kwargs: Additional arguments for mlflow.transformers.log_model
+        """
+        try:
+            mlflow.transformers.log_model(
+                transformers_model=model,
+                artifact_path=artifact_path,
+                **kwargs
+            )
+            logger.info(f"Transformer model logged to MLflow: {artifact_path}")
+        except Exception as e:
+            logger.error(f"Error logging model with transformers flavor: {e}")
+            logger.info("Attempting fallback to pytorch flavor...")
+            # Fallback to pytorch if transformers flavor fails
+            import mlflow.pytorch
+            mlflow.pytorch.log_model(model, artifact_path, **kwargs)
+            logger.info(f"Model logged using pytorch flavor: {artifact_path}")
     
     def log_artifact(self, local_path: str, artifact_path: str | None = None):
         mlflow.log_artifact(local_path, artifact_path)
