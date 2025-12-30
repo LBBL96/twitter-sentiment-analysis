@@ -1,6 +1,6 @@
 # Production Deployment Guide
 
-This document outlines the strategy, requirements, and best practices for deploying the X Sentiment Analysis Pipeline to production environments.
+This document outlines the strategy, requirements, and best practices for deploying the Reddit Sentiment Analysis Pipeline to production environments.
 
 ## Table of Contents
 
@@ -18,7 +18,7 @@ This document outlines the strategy, requirements, and best practices for deploy
 
 ## Overview
 
-The X Sentiment Analysis Pipeline is designed as a cloud-native, containerized application suitable for deployment on major cloud platforms (AWS, GCP, Azure) or on-premises infrastructure.
+The Reddit Sentiment Analysis Pipeline is designed as a cloud-native, containerized application suitable for deployment on major cloud platforms (AWS, GCP, Azure) or on-premises infrastructure.
 
 ### Production Readiness Checklist
 
@@ -41,7 +41,7 @@ The X Sentiment Analysis Pipeline is designed as a cloud-native, containerized a
 | Component | Specification | Justification |
 |-----------|--------------|---------------|
 | API Servers | 2-4 vCPUs, 4-8 GB RAM | Handle concurrent requests, model inference |
-| Streaming Service | 1-2 vCPUs, 2-4 GB RAM | Maintain persistent X API connection |
+| Streaming Service | 1-2 vCPUs, 2-4 GB RAM | Maintain persistent Reddit API connection |
 | Celery Workers | 2-4 vCPUs, 4-8 GB RAM (each) | Background task processing |
 | PostgreSQL | 2-4 vCPUs, 8-16 GB RAM | Primary data store |
 | Redis | 1-2 vCPUs, 2-4 GB RAM | Cache and message broker |
@@ -72,7 +72,7 @@ The X Sentiment Analysis Pipeline is designed as a cloud-native, containerized a
 
 ### Network Requirements
 
-- **Public Internet Access**: Required for X API connectivity
+- **Public Internet Access**: Required for Reddit API connectivity
 - **Private Network**: VPC/VNet for internal service communication
 - **Load Balancer**: For API layer (Application Load Balancer/Cloud Load Balancer)
 - **NAT Gateway**: For outbound connections from private subnets
@@ -239,8 +239,10 @@ railway up
 Create a production `.env` file with the following variables:
 
 ```bash
-# X API v2 Configuration
-TWITTER_BEARER_TOKEN=your_production_bearer_token
+# Reddit API Configuration
+REDDIT_CLIENT_ID=your_reddit_client_id
+REDDIT_CLIENT_SECRET=your_reddit_client_secret
+REDDIT_USER_AGENT=sentiment-bot/1.0
 
 # Database
 DATABASE_URL=postgresql://user:password@prod-db.internal:5432/sentiment_prod
@@ -297,7 +299,8 @@ aws secretsmanager create-secret \
 ```bash
 # Store secrets
 vault kv put secret/sentiment-analysis/prod \
-  twitter_bearer_token="..." \
+  reddit_client_id="..." \
+  reddit_client_secret="..." \
   database_url="..."
 
 # Retrieve in application
@@ -691,8 +694,8 @@ spec:
 | Redis | cache.t3.micro ElastiCache | $15 |
 | Storage | 100 GB S3 | $3 |
 | Load Balancer | ALB | $20 |
-| X API | Basic tier | $200 |
-| **Total** | | **~$350/month** |
+| Reddit API | Free tier | $0 |
+| **Total** | | **~$150/month** |
 
 ### Medium Scale (< 100K predictions/day)
 
@@ -703,9 +706,9 @@ spec:
 | Redis | cache.r5.large ElastiCache | $150 |
 | Storage | 500 GB S3 + backups | $20 |
 | Load Balancer | ALB | $20 |
-| X API | Pro tier | $5000 |
+| Reddit API | Free tier | $0 |
 | Monitoring | CloudWatch/Prometheus | $50 |
-| **Total** | | **~$5,880/month** |
+| **Total** | | **~$880/month** |
 
 ### Large Scale (1M+ predictions/day)
 
@@ -716,9 +719,9 @@ spec:
 | Redis | cache.r5.2xlarge Cluster | $600 |
 | Storage | 2 TB S3 + backups | $60 |
 | Load Balancer | ALB + CloudFront CDN | $200 |
-| X API | Enterprise tier | Custom |
+| Reddit API | Free tier | $0 |
 | Monitoring | Full observability stack | $300 |
-| **Total** | | **~$4,660/month + X API** |
+| **Total** | | **~$4,660/month** |
 
 *Note: Costs vary by region and are estimates. Always check current pricing.*
 

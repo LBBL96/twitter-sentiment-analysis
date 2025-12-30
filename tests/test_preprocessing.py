@@ -13,7 +13,7 @@ class TestTextPreprocessor:
         assert "example.com" not in result
     
     def test_clean_text_removes_mentions(self):
-        text = "@user This is a test tweet"
+        text = "@user This is a test post"
         result = self.preprocessor.clean_text(text)
         assert "@user" not in result
     
@@ -42,7 +42,7 @@ class TestFeatureExtractor:
         self.extractor = FeatureExtractor()
     
     def test_extract_features_basic(self):
-        text = "This is a test tweet!"
+        text = "This is a test post!"
         features = self.extractor.extract_features(text)
         
         assert 'original_length' in features
@@ -72,7 +72,7 @@ class TestFeatureExtractor:
 
 
 def test_preprocess_for_model():
-    text = "This is a test tweet with @mentions and #hashtags https://url.com"
+    text = "This is a test post with @mentions and #hashtags https://url.com"
     result = preprocess_for_model(text)
     assert isinstance(result, str)
     assert len(result) > 0

@@ -1,6 +1,6 @@
 # Setup Guide
 
-This guide will walk you through setting up the Twitter Sentiment Analysis Pipeline from scratch.
+This guide will walk you through setting up the Reddit Sentiment Analysis Pipeline from scratch.
 
 ## Prerequisites Installation
 
@@ -20,7 +20,7 @@ sudo apt-get install postgresql-15
 sudo systemctl start postgresql
 
 # Create database
-createdb twitter_sentiment
+createdb reddit_sentiment
 ```
 
 ### 3. Install Redis
@@ -42,7 +42,7 @@ Download from: https://www.docker.com/products/docker-desktop
 ### Step 1: Clone and Create Virtual Environment
 ```bash
 git clone <your-repo-url>
-cd twitter-sentiment-analysis
+cd reddit-sentiment-analysis
 
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
@@ -64,15 +64,13 @@ cp .env.example .env
 
 Edit `.env` with your credentials:
 ```env
-# Twitter API Credentials (Get from https://developer.twitter.com/)
-TWITTER_API_KEY=your_key_here
-TWITTER_API_SECRET=your_secret_here
-TWITTER_ACCESS_TOKEN=your_token_here
-TWITTER_ACCESS_SECRET=your_secret_here
-TWITTER_BEARER_TOKEN=your_bearer_token_here
+# Reddit API Credentials (Get from https://www.reddit.com/prefs/apps)
+REDDIT_CLIENT_ID=your_client_id_here
+REDDIT_CLIENT_SECRET=your_client_secret_here
+REDDIT_USER_AGENT=sentiment-bot/1.0
 
 # Database
-DATABASE_URL=postgresql://user:password@localhost:5432/twitter_sentiment
+DATABASE_URL=postgresql://user:password@localhost:5432/reddit_sentiment
 
 # Redis
 REDIS_URL=redis://localhost:6379/0
@@ -82,7 +80,7 @@ MLFLOW_TRACKING_URI=http://localhost:5000
 
 # Weights & Biases (Optional)
 WANDB_API_KEY=your_wandb_key_here
-WANDB_PROJECT=twitter-sentiment-analysis
+WANDB_PROJECT=reddit-sentiment-analysis
 ```
 
 ### Step 4: Initialize Database
@@ -90,13 +88,14 @@ WANDB_PROJECT=twitter-sentiment-analysis
 python scripts/init_db.py
 ```
 
-## Getting Twitter API Credentials
+## Getting Reddit API Credentials
 
-1. Go to https://developer.twitter.com/
-2. Sign up for a developer account
-3. Create a new app
-4. Generate API keys and tokens
-5. Copy credentials to `.env` file
+1. Go to https://www.reddit.com/prefs/apps
+2. Click "Create App" or "Create Another App"
+3. Select "script" type for personal use
+4. Fill in name and redirect URI (use http://localhost:8080 for local)
+5. Copy the client ID and client secret to `.env` file
+6. **Completely FREE - no credit card required!**
 
 ## Running the Application
 
@@ -153,9 +152,9 @@ python scripts/load_sample_data.py --source custom
 python scripts/train_model.py --force
 ```
 
-### 3. Start Twitter Stream (Optional)
+### 3. Start Reddit Stream (Optional)
 ```bash
-python scripts/stream_twitter.py --keywords "AI" "technology" "python"
+python scripts/stream_reddit.py --subreddits "technology" "artificial" "python"
 ```
 
 ### 4. Test API
@@ -206,10 +205,10 @@ redis-cli ping  # Should return PONG
 # Check Redis URL in .env
 ```
 
-### Issue: Twitter API Rate Limit
-- Implement exponential backoff
-- Use filtered streams instead of sample streams
-- Monitor rate limit headers
+### Issue: Reddit API Rate Limit
+- PRAW handles rate limiting automatically (60 requests/minute)
+- Add delays between requests if needed
+- Reddit API is very generous with free tier
 
 ### Issue: Model Loading Error
 ```bash

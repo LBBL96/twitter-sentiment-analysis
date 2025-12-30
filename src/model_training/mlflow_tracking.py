@@ -1,5 +1,4 @@
 import mlflow
-import mlflow.transformers
 from typing import Any
 import logging
 from config import settings

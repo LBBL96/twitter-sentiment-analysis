@@ -8,7 +8,7 @@ from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_
 from fastapi.responses import Response
 
 from src.database.database import get_db, init_db
-from src.database.models import Tweet, ModelMetrics
+from src.database.models import RedditPost, ModelMetrics
 from src.model_training.trainer import SentimentModelTrainer, label_to_sentiment
 from src.model_training.retraining_pipeline import RetrainingPipeline, DataQualityMonitor
 from src.preprocessing.text_processor import preprocess_for_model
@@ -18,8 +18,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Twitter Sentiment Analysis API",
-    description="Real-time sentiment analysis API for Twitter data",
+    title="Reddit Sentiment Analysis API",
+    description="Real-time sentiment analysis API for Reddit data",
     version="1.0.0"
 )
 
@@ -97,7 +97,7 @@ async def startup_event():
 @app.get("/", response_model=dict)
 async def root():
     return {
-        "message": "Twitter Sentiment Analysis API",
+        "message": "Reddit Sentiment Analysis API",
         "version": "1.0.0",
         "endpoints": {
             "health": "/health",
@@ -148,7 +148,8 @@ async def predict_sentiment(request: PredictionRequest, db: Session = Depends(ge
         ).order_by(ModelMetrics.created_at.desc()).first()
         model_version = latest_model.model_version if latest_model else "base"
         
-        tweet = Tweet(
+        post = RedditPost(
+            post_id=f"api_{datetime.utcnow().timestamp()}",
             text=request.text,
             preprocessed_text=preprocessed,
             sentiment_label=sentiment,
@@ -157,7 +158,7 @@ async def predict_sentiment(request: PredictionRequest, db: Session = Depends(ge
             model_version=model_version,
             processed=True
         )
-        db.add(tweet)
+        db.add(post)
         db.commit()
         
         return PredictionResponse(
@@ -197,13 +198,14 @@ async def batch_predict_sentiment(
         model_version = latest_model.model_version if latest_model else "base"
         
         responses = []
-        for text, preprocessed, result in zip(request.texts, preprocessed_texts, predictions):
+        for i, (text, preprocessed, result) in enumerate(zip(request.texts, preprocessed_texts, predictions)):
             sentiment = label_to_sentiment(result['label'])
             
             prediction_counter.inc()
             model_confidence.observe(result['confidence'])
             
-            tweet = Tweet(
+            post = RedditPost(
+                post_id=f"api_{datetime.utcnow().timestamp()}_{i}",
                 text=text,
                 preprocessed_text=preprocessed,
                 sentiment_label=sentiment,
@@ -212,7 +214,7 @@ async def batch_predict_sentiment(
                 model_version=model_version,
                 processed=True
             )
-            db.add(tweet)
+            db.add(post)
             
             responses.append(PredictionResponse(
                 text=text,

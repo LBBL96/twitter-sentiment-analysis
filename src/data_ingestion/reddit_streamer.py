@@ -22,7 +22,7 @@ class RedditStreamListener:
     - Real-time subreddit monitoring
     - Comment and submission streaming
     - Completely free with generous rate limits
-    - Rich contextual data (longer posts than tweets)
+    - Rich contextual data 
     """
     
     def __init__(

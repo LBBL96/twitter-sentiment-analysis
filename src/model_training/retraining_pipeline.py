@@ -3,7 +3,7 @@ import logging
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from src.database.database import SessionLocal
-from src.database.models import Tweet, TrainingData, ModelMetrics
+from src.database.models import RedditPost, TrainingData, ModelMetrics
 from src.model_training.trainer import SentimentModelTrainer, sentiment_to_label
 from src.model_training.mlflow_tracking import CombinedTracker
 from src.preprocessing.text_processor import preprocess_for_model
@@ -196,22 +196,22 @@ class DataQualityMonitor:
     def check_data_drift(self, window_hours: int = 24) -> dict:
         cutoff_time = datetime.utcnow() - timedelta(hours=window_hours)
         
-        recent_tweets = self.db.query(Tweet).filter(
+        recent_posts = self.db.query(RedditPost).filter(
             and_(
-                Tweet.created_at >= cutoff_time,
-                Tweet.sentiment_label.isnot(None)
+                RedditPost.created_at >= cutoff_time,
+                RedditPost.sentiment_label.isnot(None)
             )
         ).all()
         
-        if not recent_tweets:
+        if not recent_posts:
             return {'has_drift': False, 'message': 'No recent data'}
         
         sentiment_distribution = {}
-        for tweet in recent_tweets:
-            label = tweet.sentiment_label
+        for post in recent_posts:
+            label = post.sentiment_label
             sentiment_distribution[label] = sentiment_distribution.get(label, 0) + 1
         
-        total = len(recent_tweets)
+        total = len(recent_posts)
         distribution_percentages = {
             label: (count / total) * 100 
             for label, count in sentiment_distribution.items()
@@ -231,18 +231,18 @@ class DataQualityMonitor:
     def check_model_performance(self, window_hours: int = 24) -> dict:
         cutoff_time = datetime.utcnow() - timedelta(hours=window_hours)
         
-        recent_predictions = self.db.query(Tweet).filter(
+        recent_predictions = self.db.query(RedditPost).filter(
             and_(
-                Tweet.created_at >= cutoff_time,
-                Tweet.sentiment_label.isnot(None),
-                Tweet.confidence.isnot(None)
+                RedditPost.created_at >= cutoff_time,
+                RedditPost.sentiment_label.isnot(None),
+                RedditPost.confidence.isnot(None)
             )
         ).all()
         
         if not recent_predictions:
             return {'status': 'no_data', 'message': 'No recent predictions'}
         
-        confidences = [tweet.confidence for tweet in recent_predictions]
+        confidences = [post.confidence for post in recent_predictions]
         avg_confidence = sum(confidences) / len(confidences)
         
         low_confidence_count = sum(1 for c in confidences if c < 0.6)

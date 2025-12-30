@@ -50,8 +50,6 @@ class TextPreprocessor:
         
         text = re.sub(r'#(\w+)', r'\1', text)
         
-        text = re.sub(r'RT[\s]+', '', text)
-        
         text = re.sub(r'[^\w\s]', '', text)
         
         text = re.sub(r'\s+', ' ', text)
@@ -113,8 +111,6 @@ class FeatureExtractor:
         features['num_question'] = text.count('?')
         
         features['num_emojis'] = len(re.findall(r'[😀-🙏🌀-🗿🚀-🛿]', text))
-        
-        features['has_retweet'] = 1 if text.startswith('RT') else 0
         
         features['preprocessed_text'] = self.preprocessor.preprocess(text)
         

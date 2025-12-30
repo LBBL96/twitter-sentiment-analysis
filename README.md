@@ -152,7 +152,7 @@ This starts:
 
 ## 🎯 Demo Credentials
 
-For quick testing without X API access:
+For quick testing without Reddit API access:
 
 ```bash
 # Use the demo endpoint with sample data

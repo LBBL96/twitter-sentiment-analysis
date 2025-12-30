@@ -15,7 +15,7 @@ def initialize_database():
     try:
         Base.metadata.create_all(bind=engine)
         logger.info("Database initialized successfully!")
-        logger.info("Tables created: tweets, training_data, model_metrics")
+        logger.info("Tables created: posts, reddit_posts, training_data, model_metrics")
     except Exception as e:
         logger.error(f"Error initializing database: {e}")
         raise

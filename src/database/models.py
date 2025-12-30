@@ -3,11 +3,12 @@ from datetime import datetime
 from src.database.database import Base
 
 
-class Tweet(Base):
-    __tablename__ = "tweets"
+class Post(Base):
+    """Generic post model for backward compatibility."""
+    __tablename__ = "posts"
     
     id = Column(Integer, primary_key=True, index=True)
-    tweet_id = Column(String, unique=True, index=True)
+    post_id = Column(String, unique=True, index=True)
     text = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     author_id = Column(String, nullable=True)

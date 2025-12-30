@@ -1,6 +1,6 @@
 # System Architecture
 
-This document provides a comprehensive overview of the X Sentiment Analysis Pipeline architecture, including component interactions, data flow, technology choices, and design decisions.
+This document provides a comprehensive overview of the Reddit Sentiment Analysis Pipeline architecture, including component interactions, data flow, technology choices, and design decisions.
 
 ## Table of Contents
 
@@ -15,11 +15,11 @@ This document provides a comprehensive overview of the X Sentiment Analysis Pipe
 
 ## Overview
 
-The X Sentiment Analysis Pipeline is a production-ready MLOps system that ingests real-time posts from X (Twitter), performs sentiment analysis using fine-tuned transformer models, and provides predictions via a REST API. The system includes automated model retraining, experiment tracking, and comprehensive monitoring.
+The Reddit Sentiment Analysis Pipeline is a production-ready MLOps system that ingests real-time posts from Reddit, performs sentiment analysis using fine-tuned transformer models, and provides predictions via a REST API. The system includes automated model retraining, experiment tracking, and comprehensive monitoring.
 
 ### Key Characteristics
 
-- **Real-time Processing**: Streaming data ingestion with X API v2 Filtered Stream
+- **Real-time Processing**: Streaming data ingestion with Reddit API (PRAW)
 - **Modern Python**: Python 3.12 with type hints, async/await, and modern patterns
 - **MLOps Best Practices**: Experiment tracking, model versioning, automated retraining
 - **Production-Ready**: Containerized, monitored, and horizontally scalable
@@ -110,7 +110,7 @@ The X Sentiment Analysis Pipeline is a production-ready MLOps system that ingest
 ┌──────────────────────────────────┴───────────────────────────────────────┐
 │                        Data Ingestion Layer                               │
 │  ┌────────────────────────────────────────────────────────────────────┐  │
-│  │              X API v2 Filtered Stream Client                        │  │
+│  │              Reddit API Stream Client (PRAW)                         │  │
 │  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────────┐ │  │
 │  │  │  Stream      │  │  Filter      │  │   Data Validation &     │ │  │
 │  │  │  Manager     │  │  Rules       │  │   Storage               │ │  │
@@ -118,11 +118,11 @@ The X Sentiment Analysis Pipeline is a production-ready MLOps system that ingest
 │  └────────────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────┬────────────────────────────────────────┘
                                   │
-                                  │ Bearer Token Auth
+                                  │ OAuth 2.0 Auth
                                   ▼
                          ┌────────────────────┐
-                         │   X API v2         │
-                         │   (Twitter API)    │
+                         │   Reddit API       │
+                         │   (PRAW)           │
                          └────────────────────┘
 ```
 
@@ -151,16 +151,16 @@ The X Sentiment Analysis Pipeline is a production-ready MLOps system that ingest
 
 ### 2. Data Ingestion Layer
 
-**Purpose**: Streams real-time posts from X API v2 and stores them for analysis.
+**Purpose**: Streams real-time posts from Reddit API and stores them for analysis.
 
 **Key Components**:
-- **XStreamListener**: Handles incoming posts from X API v2 filtered stream
-- **XStreamManager**: Manages stream lifecycle, rules, and error recovery
+- **RedditStreamListener**: Handles incoming posts from Reddit API stream
+- **RedditStreamManager**: Manages stream lifecycle, subreddit filters, and error recovery
 - **Data Validator**: Validates and normalizes incoming data
 
 **Technology Choices**:
-- **Tweepy 4.14.0**: Official Python library for X API v2
-- **OAuth 2.0 Bearer Token**: App-Only authentication for filtered stream access
+- **PRAW (Python Reddit API Wrapper)**: Official Python library for Reddit API
+- **OAuth 2.0**: Authentication for Reddit API access
 
 **Design Decisions**:
 - Resilient connection handling with automatic reconnection
@@ -397,10 +397,10 @@ Manual Trigger / Scheduled Task / Automatic Trigger
 ### 3. Streaming Ingestion Flow
 
 ```
-X API v2 Filtered Stream
+Reddit API Stream
         │
         ▼
-[XStreamListener receives post]
+[RedditStreamListener receives post]
         │
         ▼
 [Parse & Validate Data]
@@ -707,5 +707,6 @@ X API v2 Filtered Stream
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [HuggingFace Transformers](https://huggingface.co/docs/transformers/)
 - [MLflow Documentation](https://mlflow.org/docs/latest/)
-- [X API v2 Documentation](https://developer.x.com/en/docs/x-api)
+- [Reddit API Documentation](https://www.reddit.com/dev/api/)
+- [PRAW Documentation](https://praw.readthedocs.io/)
 - [The Twelve-Factor App](https://12factor.net/)

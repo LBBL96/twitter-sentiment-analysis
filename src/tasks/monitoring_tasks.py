@@ -37,12 +37,12 @@ def monitor_data_quality():
 def log_metrics_summary():
     db = SessionLocal()
     try:
-        from src.database.models import Tweet
+        from src.database.models import RedditPost
         from datetime import datetime, timedelta
         
         cutoff = datetime.utcnow() - timedelta(hours=1)
-        recent_predictions = db.query(Tweet).filter(
-            Tweet.created_at >= cutoff
+        recent_predictions = db.query(RedditPost).filter(
+            RedditPost.created_at >= cutoff
         ).count()
         
         logger.info(f"Predictions in last hour: {recent_predictions}")

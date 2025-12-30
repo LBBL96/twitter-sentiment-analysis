@@ -9,7 +9,7 @@ help:
 	@echo "  make format       - Format code with black"
 	@echo "  make init-db      - Initialize database"
 	@echo "  make train        - Train model"
-	@echo "  make stream       - Start Twitter stream"
+	@echo "  make stream       - Start Reddit stream"
 	@echo "  make docker-up    - Start all services with Docker Compose"
 	@echo "  make docker-down  - Stop all Docker services"
 	@echo "  make clean        - Clean temporary files"
@@ -41,8 +41,8 @@ train:
 	python scripts/train_model.py --force
 
 stream:
-	@echo "Starting Twitter stream. Press Ctrl+C to stop."
-	python scripts/stream_twitter.py --keywords "AI" "technology"
+	@echo "Starting Reddit stream. Press Ctrl+C to stop."
+	python scripts/stream_reddit.py --subreddits "technology" "artificial"
 
 load-data:
 	python scripts/load_sample_data.py --source both
