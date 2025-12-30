@@ -1,25 +1,43 @@
-# X (Twitter) Sentiment Analysis Pipeline
+# Reddit Sentiment Analysis Pipeline
 
-A comprehensive real-time sentiment analysis system for X (formerly Twitter) data with streaming ingestion, ML model training, automated retraining, and production-ready API deployment.
+![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115.5-green.svg)
+![PyTorch](https://img.shields.io/badge/PyTorch-2.5.1-red.svg)
+![MLflow](https://img.shields.io/badge/MLflow-2.18.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Code Style](https://img.shields.io/badge/code%20style-black-black.svg)
 
-## Features
+A production-ready, real-time sentiment analysis system for Reddit data with streaming ingestion, transformer-based ML models, automated retraining, and comprehensive MLOps integration. **100% FREE** - no credit card or paid API access required!
 
-- **Real-Time Data Ingestion**: Stream posts using **X API v2 Filtered Stream** with Bearer Token authentication
-- **Text Preprocessing**: Advanced NLP preprocessing with emoji handling, URL removal, and tokenization
-- **Feature Engineering**: Extract meaningful features from text data
-- **Model Training**: Fine-tune BERT/transformer models (DistilBERT by default)
-- **Model Versioning**: Track model versions with MLflow and Weights & Biases
-- **Automated Retraining**: Trigger retraining based on data drift and performance degradation
-- **REST API**: FastAPI-based prediction endpoints with Prometheus metrics
-- **Monitoring & Logging**: Integrated MLflow, W&B, Prometheus, and Grafana
-- **CI/CD Pipeline**: GitHub Actions for testing, building, and deployment
-- **Containerization**: Docker and Docker Compose for easy deployment
+## 📚 Documentation
+
+- **[Architecture Overview](ARCHITECTURE.md)** - System design, components, and data flow
+- **[Deployment Guide](DEPLOYMENT.md)** - Production deployment strategies and infrastructure
+- **[Reddit API Setup](REDDIT_SETUP.md)** - Quick guide to get free Reddit API credentials
+
+## ✨ Features
+
+### Core Capabilities
+- **🔄 Real-Time Data Ingestion**: Stream posts and comments using **Reddit API (PRAW)** - completely free!
+- **🧹 Advanced Text Preprocessing**: NLP preprocessing with emoji handling, URL removal, and tokenization (NLTK, spaCy)
+- **🤖 Transformer Models**: Fine-tune BERT/DistilBERT models with HuggingFace Transformers
+- **📊 MLOps Integration**: Full experiment tracking with MLflow and Weights & Biases
+- **🔁 Automated Retraining**: Intelligent retraining based on data drift and performance degradation
+- **🚀 Production-Ready API**: FastAPI with async support, automatic OpenAPI docs, and Prometheus metrics
+- **📦 Containerized**: Docker and Docker Compose for consistent deployments
+
+### Technical Highlights
+- **Modern Python 3.12**: Type hints with PEP 604 syntax, async/await patterns
+- **Horizontal Scaling**: Stateless API design with Redis caching and Celery workers
+- **Comprehensive Monitoring**: Prometheus metrics, structured logging, health checks
+- **Database Migrations**: Alembic for version-controlled schema changes
+- **Security Best Practices**: Input validation, secrets management, TLS/SSL ready
 
 ## Architecture
 
 ```
 ├── src/
-│   ├── data_ingestion/       # Twitter streaming and data collection
+│   ├── data_ingestion/       # Reddit streaming and data collection
 │   ├── preprocessing/         # Text preprocessing and feature engineering
 │   ├── model_training/        # Model training, versioning, and retraining
 │   ├── api/                   # FastAPI application
@@ -31,27 +49,50 @@ A comprehensive real-time sentiment analysis system for X (formerly Twitter) dat
 └── docker-compose.yml         # Docker orchestration
 ```
 
-## Prerequisites
+## 📋 Prerequisites
 
-- Python 3.12+
+### Required
+- **Python 3.12+** (uses modern type hints and features)
+- **Docker & Docker Compose** (recommended for easy setup)
+- **Reddit API Access** (100% FREE):
+  - Reddit account (free)
+  - Create app at [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps)
+  - Get Client ID and Client Secret (takes 2 minutes)
+  - **No credit card required!**
+  - Rate limit: 60 requests/minute (very generous)
+
+### Optional (for manual installation)
 - PostgreSQL 15+
 - Redis 7+
-- Docker & Docker Compose (optional but recommended)
-- **X API v2 Access**:
-  - Developer account at https://developer.x.com/
-  - Developer App associated with a Project
-  - **Bearer Token** (App-Only authentication) - REQUIRED
-  - Minimum: Basic tier ($200/mo) for filtered stream access
-  - Recommended: Pro tier ($5000/mo) for production (1M posts/month)
-- Weights & Biases account (optional)
+- Weights & Biases account (enhanced experiment tracking)
 
-## Quick Start
+## 🚀 Quick Start
 
-### 1. Clone and Setup Environment
+### Option 1: Docker Compose (Recommended)
+
+```bash
+# 1. Clone and configure
+git clone https://github.com/yourusername/reddit-sentiment-analysis.git
+cd reddit-sentiment-analysis
+cp .env.example .env
+# Edit .env with your Reddit API credentials (free - see setup below)
+
+# 2. Start all services
+docker compose up -d
+
+# 3. Access the application
+open http://localhost:8000/docs
+```
+
+That's it! All services (API, Database, Redis, MLflow) are now running.
+
+### Option 2: Manual Installation
+
+#### 1. Clone and Setup Environment
 
 ```bash
 git clone <repository-url>
-cd twitter-sentiment-analysis
+cd reddit-sentiment-analysis
 
 # Create virtual environment
 python -m venv venv
@@ -72,14 +113,13 @@ cp .env.example .env
 ```
 
 Required environment variables:
-- `TWITTER_BEARER_TOKEN` - **REQUIRED** for X API v2 filtered stream
+- `REDDIT_CLIENT_ID` - **REQUIRED** (free from reddit.com/prefs/apps)
+- `REDDIT_CLIENT_SECRET` - **REQUIRED** (free from reddit.com/prefs/apps)
+- `REDDIT_USER_AGENT` - Your app identifier (e.g., "sentiment-bot/1.0")
 - `DATABASE_URL` (PostgreSQL connection string)
 - `REDIS_URL` (Redis connection string)
 - `MLFLOW_TRACKING_URI` (MLflow server URL)
 - `WANDB_API_KEY` (optional, for W&B tracking)
-
-Optional (only for v1.1 endpoints):
-- `TWITTER_API_KEY`, `TWITTER_API_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_SECRET`
 
 ### 3. Initialize Database
 
@@ -90,7 +130,7 @@ python scripts/init_db.py
 ### 4. Start Services with Docker Compose
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 This starts:
@@ -104,21 +144,46 @@ This starts:
 
 ### 5. Access the Application
 
-- **API Documentation**: http://localhost:8000/docs
-- **MLflow UI**: http://localhost:5000
-- **Prometheus**: http://localhost:9090
-- **Grafana**: http://localhost:3000 (admin/admin)
+- **API Documentation**: http://localhost:8000/docs (Interactive Swagger UI)
+- **API Health Check**: http://localhost:8000/health
+- **MLflow UI**: http://localhost:5000 (Experiment tracking)
+- **Prometheus**: http://localhost:9090 (Metrics)
+- **Grafana**: http://localhost:3000 (Dashboards - admin/admin)
+
+## 🎯 Demo Credentials
+
+For quick testing without X API access:
+
+```bash
+# Use the demo endpoint with sample data
+curl -X POST "http://localhost:8000/predict" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "I love this amazing product! Best purchase ever!"}'
+
+# Expected response:
+{
+  "sentiment": "positive",
+  "confidence": 0.94,
+  "scores": {
+    "positive": 0.94,
+    "neutral": 0.04,
+    "negative": 0.02
+  }
+}
+```
+
+See the [API Documentation](http://localhost:8000/docs) for all available endpoints.
 
 ## Usage
 
-### Stream Twitter Data
+### Stream Reddit Data
 
 ```python
-from src.data_ingestion.twitter_streamer import TwitterStreamManager
+from src.data_ingestion.reddit_streamer import RedditStreamManager
 
-manager = TwitterStreamManager()
-keywords = ['technology', 'AI', 'machine learning']
-manager.start_stream(keywords=keywords, save_to_db=True)
+manager = RedditStreamManager()
+subreddits = ['technology', 'MachineLearning', 'artificial']
+manager.stream_subreddit_submissions(subreddits, save_to_db=True)
 ```
 
 ### Train a Model
@@ -230,7 +295,7 @@ GitHub Actions workflows:
 
 ### Required GitHub Secrets
 
-- `TWITTER_API_KEY`, `TWITTER_API_SECRET`, `TWITTER_ACCESS_TOKEN`, `TWITTER_ACCESS_SECRET`, `TWITTER_BEARER_TOKEN`
+- `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET`, `REDDIT_USER_AGENT`
 - `DOCKER_USERNAME`, `DOCKER_PASSWORD`
 - `DEPLOY_KEY`, `DEPLOY_HOST`
 - `MLFLOW_TRACKING_URI`, `WANDB_API_KEY`
@@ -307,7 +372,7 @@ Key configuration options in `config.py`:
 
 ### Common Issues
 
-1. **Twitter API Rate Limits**: Implement exponential backoff and respect rate limits
+1. **Reddit API Rate Limits**: PRAW handles rate limiting automatically (60 req/min)
 2. **Memory Issues**: Reduce batch size or use gradient accumulation
 3. **Database Connection Errors**: Check PostgreSQL is running and credentials are correct
 4. **Model Loading Errors**: Ensure model files exist and are not corrupted
@@ -325,17 +390,6 @@ docker-compose logs celery_worker
 docker-compose logs mlflow
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with tests
-4. Ensure all tests pass and code is formatted
-5. Submit a pull request
-
-## License
-
-See LICENSE file for details.
 
 ## Support
 
@@ -344,12 +398,44 @@ For issues and questions:
 - Check existing documentation
 - Review MLflow and W&B dashboards for model insights
 
-## Roadmap
+## 🗺️ Roadmap
 
-- [ ] Add support for multiple languages
-- [ ] Implement active learning for label efficiency
-- [ ] Add model interpretability (SHAP, LIME)
-- [ ] Support for custom sentiment categories
-- [ ] Real-time dashboard for predictions
-- [ ] A/B testing framework for model versions
-- [ ] Advanced data augmentation techniques
+### Short-term
+- [ ] Model A/B testing framework
+- [ ] GraphQL API option
+- [ ] Enhanced data drift detection
+- [ ] Multi-language support
+
+### Medium-term
+- [ ] Active learning pipeline
+- [ ] Model interpretability (SHAP, LIME)
+- [ ] Real-time prediction dashboard
+- [ ] Advanced data augmentation
+
+### Long-term
+- [ ] Multi-model ensemble predictions
+- [ ] Edge deployment for inference
+- [ ] Federated learning support
+- [ ] Custom sentiment categories per client
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes with tests
+4. Ensure all tests pass and code is formatted (`black src/`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [HuggingFace Transformers](https://huggingface.co/transformers/) for transformer models
+- [FastAPI](https://fastapi.tiangolo.com/) for the excellent web framework
+- [MLflow](https://mlflow.org/) for experiment tracking
+- [PRAW](https://praw.readthedocs.io/) for the Reddit API wrapper
+- [Reddit](https://www.reddit.com/) for free API access

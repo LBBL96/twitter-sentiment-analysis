@@ -33,6 +33,29 @@ class TrainingData(Base):
     split = Column(String, nullable=True)
 
 
+class RedditPost(Base):
+    __tablename__ = "reddit_posts"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(String, unique=True, index=True)
+    text = Column(Text)
+    title = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    author = Column(String, nullable=True)
+    subreddit = Column(String, index=True)
+    score = Column(Integer, nullable=True)
+    num_comments = Column(Integer, nullable=True)
+    url = Column(String, nullable=True)
+    post_type = Column(String, nullable=True)
+    preprocessed_text = Column(Text, nullable=True)
+    sentiment_label = Column(String, nullable=True)
+    sentiment_score = Column(Float, nullable=True)
+    confidence = Column(Float, nullable=True)
+    model_version = Column(String, nullable=True)
+    processed = Column(Boolean, default=False)
+    metadata = Column(JSON, nullable=True)
+
+
 class ModelMetrics(Base):
     __tablename__ = "model_metrics"
     

@@ -45,3 +45,6 @@ checkpoints/
 *.swp
 *.swo
 *~
+
+# Personal demo preparation notes
+demo.md

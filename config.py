@@ -3,33 +3,28 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     """
-    Configuration for X API v2 Sentiment Analysis Pipeline
+    Configuration for Reddit Sentiment Analysis Pipeline
     
-    X API v2 Filtered Stream Requirements:
-    - Bearer Token (App-Only) authentication - REQUIRED
-    - Developer App associated with a Project
-    - Minimum access level: Basic ($200/mo) for filtered stream
-    - Pro ($5000/mo) recommended for production (1M posts/month)
-    
-    Get credentials at: https://developer.x.com/en/portal/dashboard
+    Reddit API Requirements:
+    - Client ID and Client Secret - REQUIRED
+    - Completely FREE with no credit card required
+    - Create app at: https://www.reddit.com/prefs/apps
+    - Select "script" type for personal use
+    - Rate limit: 60 requests/minute (very generous)
     """
     
-    # X API v2 Bearer Token - REQUIRED for filtered stream
-    twitter_bearer_token: str
-    
-    # Legacy OAuth 1.0a credentials (optional, for v1.1 endpoints only)
-    twitter_api_key: str = ""
-    twitter_api_secret: str = ""
-    twitter_access_token: str = ""
-    twitter_access_secret: str = ""
+    # Reddit API Credentials - REQUIRED (all free)
+    reddit_client_id: str
+    reddit_client_secret: str
+    reddit_user_agent: str = "sentiment-analysis-bot/1.0"
     
     wandb_api_key: str | None = None
-    wandb_project: str = "twitter-sentiment-analysis"
+    wandb_project: str = "reddit-sentiment-analysis"
     
     mlflow_tracking_uri: str = "http://localhost:5000"
     mlflow_experiment_name: str = "sentiment-analysis"
     
-    database_url: str = "postgresql://user:password@localhost:5432/twitter_sentiment"
+    database_url: str = "postgresql://user:password@localhost:5432/reddit_sentiment"
     redis_url: str = "redis://localhost:6379/0"
     
     model_name: str = "distilbert-base-uncased"

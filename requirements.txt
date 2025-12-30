@@ -1,4 +1,4 @@
-tweepy==4.14.0
+praw==7.7.1
 transformers==4.46.0
 torch==2.5.1
 scikit-learn==1.5.2
